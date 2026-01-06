@@ -9,7 +9,7 @@ from pytgcalls import PyTgCalls
 # Note: StreamType removed because it's not supported in v2.2.0+
 
 from pytgcalls.exceptions import (
-    AlreadyJoinedError,
+    AlreadyJoined,
     NoActiveGroupCall,
     TelegramServerError,
 )
