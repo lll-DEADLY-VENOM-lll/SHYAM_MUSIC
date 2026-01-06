@@ -7,30 +7,23 @@ from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup
 from pytgcalls import PyTgCalls
 
-# --- SAFE EXCEPTION IMPORTS ---
-try:
-    from pytgcalls.exceptions import AlreadyJoinedError
-except ImportError:
-    try:
-        from pytgcalls.exceptions import AlreadyJoined as AlreadyJoinedError
-    except ImportError:
-        AlreadyJoinedError = Exception
-
-try:
-    from pytgcalls.exceptions import NoActiveGroupCall
-except ImportError:
-    NoActiveGroupCall = Exception
-
-try:
-    from pytgcalls.exceptions import TelegramServerError
-except ImportError:
-    TelegramServerError = Exception
-# ------------------------------
-
-from pytgcalls.types import Update
-from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
-from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
+# --- New Imports for v2.2.0 ---
+from pytgcalls.types import (
+    AudioPiped,
+    AudioVideoPiped,
+    HighQualityAudio,
+    MediumQualityVideo,
+    Update,
+)
 from pytgcalls.types.stream import StreamAudioEnded
+from pytgcalls.exceptions import (
+    AlreadyJoined,
+    NoActiveGroupCall,
+    TelegramServerError,
+)
+
+# Purane code ke sath compatibility ke liye alias
+AlreadyJoinedError = AlreadyJoined
 
 import config
 from BIGFM import LOGGER, YouTube, app
