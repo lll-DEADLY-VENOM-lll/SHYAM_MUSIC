@@ -1,5 +1,5 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#     ⚙️ CONFIGURATION FILE | 
+#     ⚙️ CONFIGURATION FILE | SHYAM VIBE MUSIC BOT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 import os
@@ -9,14 +9,28 @@ from pyrogram import filters
 
 load_dotenv()
 
+# 🛠️ HELPER FUNCTION FOR SAFE INTEGER CONVERSION
+# Yeh function bot ko crash hone se bachayega agar ID khali reh jaye toh.
+def get_int_env(key: str, default: int) -> int:
+    value = os.getenv(key)
+    if value and value.strip():
+        try:
+            return int(value)
+        except ValueError:
+            return default
+    return default
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 📲 Telegram & API Credentials
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-API_ID = int(os.getenv("API_ID", ""))
+# API_ID fix: Agar khali hua toh bot crash nahi hoga, default 0 lega.
+API_ID = get_int_env("API_ID", 0) 
 API_HASH = os.getenv("API_HASH", "")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
-OWNER_ID = int(os.getenv("OWNER_ID", "8520496440"))
+
+# OWNER_ID fix: Default value 8520496440 set hai.
+OWNER_ID = get_int_env("OWNER_ID", 8520496440)
 OWNER_USERNAME = os.getenv("OWNER_USERNAME", "KIRU_OP")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -24,7 +38,7 @@ OWNER_USERNAME = os.getenv("OWNER_USERNAME", "KIRU_OP")
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 MONGO_DB_URI = os.getenv("MONGO_DB_URI", "")
-LOG_GROUP_ID = int(os.getenv("LOG_GROUP_ID", "-1003034048678"))
+LOG_GROUP_ID = get_int_env("LOG_GROUP_ID", -1003034048678)
 HEROKU_APP_NAME = os.getenv("HEROKU_APP_NAME", "")
 HEROKU_API_KEY = os.getenv("HEROKU_API_KEY", "") 
 
@@ -48,15 +62,15 @@ PRIVACY_LINK = os.getenv("PRIVACY_LINK", "https://graph.org/Privacy-Policy-05-01
 # ⏱️ Duration & Playlist Settings
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DURATION_LIMIT_MIN = int(os.getenv("DURATION_LIMIT", 300))
-PLAYLIST_FETCH_LIMIT = int(os.getenv("PLAYLIST_FETCH_LIMIT", 25))
+DURATION_LIMIT_MIN = get_int_env("DURATION_LIMIT", 300)
+PLAYLIST_FETCH_LIMIT = get_int_env("PLAYLIST_FETCH_LIMIT", 25)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 📦 File Size Limits (in bytes)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-TG_AUDIO_FILESIZE_LIMIT = int(os.getenv("TG_AUDIO_FILESIZE_LIMIT", 104857600))
-TG_VIDEO_FILESIZE_LIMIT = int(os.getenv("TG_VIDEO_FILESIZE_LIMIT", 2145386496))
+TG_AUDIO_FILESIZE_LIMIT = get_int_env("TG_AUDIO_FILESIZE_LIMIT", 104857600)
+TG_VIDEO_FILESIZE_LIMIT = get_int_env("TG_VIDEO_FILESIZE_LIMIT", 2145386496)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🎧 Spotify Developer Credentials
@@ -79,10 +93,10 @@ STRING5 = os.getenv("STRING_SESSION5", None)
 # ⚙️ Runtime Configurations
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-AUTO_LEAVING_ASSISTANT = bool(os.getenv("AUTO_LEAVING_ASSISTANT", False))
+AUTO_LEAVING_ASSISTANT = os.getenv("AUTO_LEAVING_ASSISTANT", "False").lower() == "true"
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🖼️ Image URLs (Can be customized)
+# 🖼️ Image URLs
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 START_IMG_URL = os.getenv("START_IMG_URL", "https://graph.org/file/cdac0910ad60867e08cd2-eec1ead13b60905f29.jpg")
@@ -115,9 +129,10 @@ confirmer = {}
 
 def time_to_seconds(time):
     stringt = str(time)
-    return sum(int(x) * 60**i for i, x in enumerate(reversed(stringt.split(":"))))
-
-DURATION_LIMIT = int(time_to_seconds(f"{DURATION_LIMIT_MIN}:00"))
+    try:
+        return sum(int(x) * 60**i for i, x in enumerate(reversed(stringt.split(":"))))
+    except (ValueError, TypeError):
+        return 0
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ❌ Validate Support Links
@@ -125,16 +140,12 @@ DURATION_LIMIT = int(time_to_seconds(f"{DURATION_LIMIT_MIN}:00"))
 
 if SUPPORT_CHANNEL:
     if not re.match(r"(?:http|https)://", SUPPORT_CHANNEL):
-        raise SystemExit(
-            "[ERROR] - SUPPORT_CHANNEL URL is invalid. It must start with https://"
-        )
+        raise SystemExit("[ERROR] - SUPPORT_CHANNEL URL is invalid.")
 
 if SUPPORT_GROUP:
     if not re.match(r"(?:http|https)://", SUPPORT_GROUP):
-        raise SystemExit(
-            "[ERROR] - SUPPORT_GROUP URL is invalid. It must start with https://"
-        )
+        raise SystemExit("[ERROR] - SUPPORT_GROUP URL is invalid.")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#     ✅ CONFIG LOADED SUCCESSFULLY | Designed By @silenthrax
+#     ✅ CONFIG LOADED SUCCESSFULLY | Fixed By KIRU
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
