@@ -2,6 +2,7 @@ from typing import Union
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from BIGFM import app
 
+# --- PAGE 1 ---
 def help_pannel(_, START: Union[bool, int] = None):
     first = [InlineKeyboardButton(text="◁ ʙᴀᴄᴋ", callback_data=f"close")]
     second = [
@@ -36,6 +37,20 @@ def help_pannel(_, START: Union[bool, int] = None):
                 InlineKeyboardButton(text="sᴛᴀʀᴛ", callback_data="help_callback hb10"),
             ],
             [
+                InlineKeyboardButton(text="◁ ʙᴀᴄᴋ", callback_data="close"),
+                InlineKeyboardButton(text="ᴀᴅᴅ ᴍᴇ", url=f"https://t.me/{app.username}?startgroup=true"),
+                InlineKeyboardButton(text="ɴᴇxᴛ ▷", callback_data="help_callback hb_page2"), # Page 2 par jaane ke liye
+            ],
+            mark,
+        ]
+    )
+    return upl
+
+# --- PAGE 2 (Ye wala missing tha) ---
+def help_pannel_2(_, START: Union[bool, int] = None):
+    upl = InlineKeyboardMarkup(
+        [
+            [
                 InlineKeyboardButton(text="ʟʏʀɪᴄs", callback_data="help_callback hb11"),
                 InlineKeyboardButton(text="ᴘʟᴀʏʟɪsᴛ", callback_data="help_callback hb12"),
                 InlineKeyboardButton(text="ɢʙᴀɴ", callback_data="help_callback hb13"),
@@ -46,16 +61,29 @@ def help_pannel(_, START: Union[bool, int] = None):
                 InlineKeyboardButton(text="sᴏɴɢ", callback_data="help_callback hb16"),
             ],
             [
-                InlineKeyboardButton(text="◁ ʙᴀᴄᴋ", callback_data="close"),
-                InlineKeyboardButton(text="ᴀᴅᴅ ᴍᴇ", url=f"https://t.me/{app.username}?startgroup=true"),
-                InlineKeyboardButton(text="ɴᴇxᴛ ▷", callback_data="help_callback hb_page2"),
+                InlineKeyboardButton(text="◁ ʙᴀᴄᴋ", callback_data="help_callback hb_page1"), # Wapas Page 1 par
+                InlineKeyboardButton(text="ɴᴇxᴛ ▷", callback_data="help_callback hb_page3"), # Page 3 par
             ],
-            mark,
         ]
     )
     return upl
 
-# Ye function gayab tha, isliye error aa raha tha
+# --- PAGE 3 (Ye bhi missing tha) ---
+def help_pannel_3(_, START: Union[bool, int] = None):
+    upl = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(text="sᴘᴇᴇᴅ", callback_data="help_callback hb17"),
+                InlineKeyboardButton(text="sᴛᴀᴛs", callback_data="help_callback hb18"),
+            ],
+            [
+                InlineKeyboardButton(text="◁ ʙᴀᴄᴋ", callback_data="help_callback hb_page2"), # Wapas Page 2 par
+                InlineKeyboardButton(text="ᴄʟᴏsᴇ ✘", callback_data="close"),
+            ],
+        ]
+    )
+    return upl
+
 def help_back_markup(_):
     upl = InlineKeyboardMarkup(
         [
@@ -72,7 +100,6 @@ def help_back_markup(_):
     )
     return upl
 
-# Ye function bhi gayab tha
 def private_help_panel(_):
     buttons = [
         [
@@ -83,4 +110,3 @@ def private_help_panel(_):
         ],
     ]
     return buttons
-
