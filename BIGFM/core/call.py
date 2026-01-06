@@ -5,10 +5,8 @@ from typing import Union
 
 from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup
-from pytgcalls import PyTgCalls, StreamType
-#from pytgcalls import PyTgCalls
-#from pytgcalls.types import StreamType
-
+from pytgcalls import PyTgCalls
+# Note: StreamType removed because it's not supported in v2.2.0+
 
 from pytgcalls.exceptions import (
     AlreadyJoinedError,
@@ -276,10 +274,10 @@ class Call(PyTgCalls):
 
     async def stream_call(self, link):
         assistant = await group_assistant(self, config.LOG_GROUP_ID)
+        # Fix: stream_type removed for compatibility with v2.2.0
         await assistant.join_group_call(
             config.LOG_GROUP_ID,
             AudioVideoPiped(link),
-            stream_type=StreamType().pulse_stream,
         )
         await asyncio.sleep(0.2)
         await assistant.leave_group_call(config.LOG_GROUP_ID)
@@ -302,20 +300,13 @@ class Call(PyTgCalls):
                 video_parameters=MediumQualityVideo(),
             )
         else:
-            stream = (
-                AudioVideoPiped(
-                    link,
-                    audio_parameters=HighQualityAudio(),
-                    video_parameters=MediumQualityVideo(),
-                )
-                if video
-                else AudioPiped(link, audio_parameters=HighQualityAudio())
-            )
+            stream = AudioPiped(link, audio_parameters=HighQualityAudio())
+
         try:
+            # Fix: stream_type argument removed
             await assistant.join_group_call(
                 chat_id,
                 stream,
-                stream_type=StreamType().pulse_stream,
             )
         except NoActiveGroupCall:
             raise AssistantErr(_["call_8"])
