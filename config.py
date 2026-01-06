@@ -16,15 +16,15 @@ load_dotenv()
 API_ID = int(os.getenv("API_ID", ""))
 API_HASH = os.getenv("API_HASH", "")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
-OWNER_ID = int(os.getenv("OWNER_ID", ""))
-OWNER_USERNAME = os.getenv("OWNER_USERNAME", "VNI0X")
+OWNER_ID = int(os.getenv("OWNER_ID", "8520496440"))
+OWNER_USERNAME = os.getenv("OWNER_USERNAME", "KIRU_OP")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🛠️ Database & Deployment Configs
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 MONGO_DB_URI = os.getenv("MONGO_DB_URI", "")
-LOG_GROUP_ID = int(os.getenv("LOG_GROUP_ID", ""))
+LOG_GROUP_ID = int(os.getenv("LOG_GROUP_ID", "-1003034048678"))
 HEROKU_APP_NAME = os.getenv("HEROKU_APP_NAME", "")
 HEROKU_API_KEY = os.getenv("HEROKU_API_KEY", "") 
 
