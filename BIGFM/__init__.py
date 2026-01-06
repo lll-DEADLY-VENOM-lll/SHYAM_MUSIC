@@ -1,13 +1,3 @@
-import asyncio
-
-# --- Force Loop Fix Start ---
-try:
-    asyncio.get_event_loop()
-except RuntimeError:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-# --- Force Loop Fix End ---
-
 from BIGFM.core.bot import Aviax
 from BIGFM.core.dir import dirr
 from BIGFM.core.git import git
@@ -23,6 +13,7 @@ heroku()
 
 app = Aviax()
 userbot = Userbot()
+
 
 from .platforms import *
 
