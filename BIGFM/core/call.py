@@ -7,24 +7,33 @@ from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup
 from pytgcalls import PyTgCalls
 
-# --- py-tgcalls v2.2.0 Ke Sahi Imports ---
-from pytgcalls.types import (
-    AudioPiped,
-    AudioVideoPiped,
-    HighQualityAudio,
-    MediumQualityVideo,
-    Update,
-)
-from pytgcalls.types.stream import StreamAudioEnded
-from pytgcalls.exceptions import (
-    AlreadyJoined,
-    NoActiveGroupCall,
-    TelegramServerError,
-)
+# --- SAFE DYNAMIC IMPORTS (No more ImportErrors) ---
+import pytgcalls.types as pytg_types
+import pytgcalls.exceptions as pytg_ex
 
-# Purane code ke liye compatibility
-AlreadyJoinedError = AlreadyJoined
-# ---------------------------------------
+# AudioPiped ko dhundne ki koshish
+AudioPiped = getattr(pytg_types, "AudioPiped", None)
+AudioVideoPiped = getattr(pytg_types, "AudioVideoPiped", None)
+HighQualityAudio = getattr(pytg_types, "HighQualityAudio", None)
+MediumQualityVideo = getattr(pytg_types, "MediumQualityVideo", None)
+Update = getattr(pytg_types, "Update", None)
+
+# Agar upar wala fail ho jaye (v1.x compatibility)
+if not AudioPiped:
+    from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
+    from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
+
+# StreamEnd handling
+try:
+    from pytgcalls.types.stream import StreamAudioEnded
+except ImportError:
+    StreamAudioEnded = Exception
+
+# Exceptions handling
+AlreadyJoinedError = getattr(pytg_ex, "AlreadyJoined", getattr(pytg_ex, "AlreadyJoinedError", Exception))
+NoActiveGroupCall = getattr(pytg_ex, "NoActiveGroupCall", Exception)
+TelegramServerError = getattr(pytg_ex, "TelegramServerError", Exception)
+# --------------------------------------------------
 
 import config
 from BIGFM import LOGGER, YouTube, app
@@ -91,17 +100,12 @@ class Call(PyTgCalls):
 
     async def stop_stream_force(self, chat_id: int):
         for ass in [self.one, self.two, self.three, self.four, self.five]:
-            try:
-                await ass.leave_group_call(chat_id)
-            except:
-                pass
+            try: await ass.leave_group_call(chat_id)
+            except: pass
         await _clear_(chat_id)
 
     async def speedup_stream(self, chat_id: int, file_path, speed, playing):
         assistant = await group_assistant(self, chat_id)
-        base = os.path.basename(file_path)
-        out = os.path.join(os.getcwd(), "playback", str(speed), base)
-        # Assuming speed logic exists in your speed_converter
         dur = await asyncio.get_event_loop().run_in_executor(None, check_duration, file_path)
         played, con_seconds = speed_converter(playing[0]["played"], speed)
         duration = seconds_to_min(int(dur))
@@ -133,8 +137,6 @@ class Call(PyTgCalls):
             raise AssistantErr(_["call_10"])
         await add_active_chat(chat_id)
         await music_on(chat_id)
-        if video:
-            await add_active_video_chat(chat_id)
 
     async def change_stream(self, client, chat_id):
         check = db.get(chat_id)
@@ -156,10 +158,8 @@ class Call(PyTgCalls):
     async def ping(self):
         pings = []
         for obj in [self.one, self.two, self.three, self.four, self.five]:
-            try:
-                pings.append(await obj.ping)
-            except:
-                pass
+            try: pings.append(await obj.ping)
+            except: pass
         return str(round(sum(pings) / len(pings), 3)) if pings else "0"
 
     async def start(self):
