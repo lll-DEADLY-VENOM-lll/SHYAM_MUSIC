@@ -8,7 +8,7 @@ ADMIN_ID = 6123456789  # <--- Apni ID yahan daalein
 
 # --- PREMIUM MESSAGE ---
 BROADCAST_TEXT = """
-<b>✨ 𝐒𝐎𝐍𝐀𝐋𝐈 𝐌𝐔𝐒𝐈𝐂 𝐏𝐑𝐄𝐌𝐈𝐔𝐌 ✨</b>
+<b>✨ sʜʏᴀᴍᴠɪʙᴇ ᴍᴜsɪᴄ ✨</b>
 ————— 「 @sonalixbot 」 —————
 
 🚀 <b>24/7 Ultra-High Uptime</b>
@@ -18,10 +18,10 @@ BROADCAST_TEXT = """
 
 🎧 <i>Experience High-Fidelity Streaming on Telegram. Fast & Stable.</i>
 
-🚀 <b>Add Sonali Music now and upgrade your group's vibe!</b>
+🚀 <b>Add sʜʏᴀᴍᴠɪʙᴇ ᴍᴜsɪᴄ now and upgrade your group's vibe!</b>
 
-<a href="https://t.me/sonalixbot">🔗 CLICK HERE TO START BOT</a>
-<a href="https://t.me/sonalixbot?startgroup=true">➕ ADD ME TO YOUR GROUP</a>
+<a href="https://t.me/SHYAMVIBEBOT">🔗 CLICK HERE TO START BOT</a>
+<a href="https://t.me/SHYAMVIBEBOT?startgroup=true">➕ ADD ME TO YOUR GROUP</a>
 """
 
 # Yeh check karne ke liye ki broadcast chalu hai ya nahi
