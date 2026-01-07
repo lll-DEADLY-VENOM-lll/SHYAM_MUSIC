@@ -12,7 +12,7 @@ from pyrogram.types import (
 # Bot ke imports
 from BIGFM import app 
 from BIGFM.core.mongo import mongodb
-from config import OWNER_ID
+import config
 
 # --- DATABASE LOGIC ---
 nightdb = mongodb.nightmode
@@ -29,6 +29,15 @@ async def nightmode_on(chat_id: int):
 
 async def nightmode_off(chat_id: int):
     return await nightdb.delete_one({"chat_id": chat_id})
+
+# --- OWNER CHECK HELPER ---
+def is_owner(user_id):
+    owners = config.OWNER_ID
+    if isinstance(owners, int): # Agar single ID hai
+        return user_id == owners
+    elif isinstance(owners, list): # Agar IDs ki list hai
+        return user_id in owners
+    return False
 
 # --- PERMISSIONS ---
 CLOSE_CHAT = ChatPermissions(
@@ -61,20 +70,22 @@ buttons = InlineKeyboardMarkup(
     ]]
 )
 
-# --- COMMAND (SIRF OWNER KE LIYE) ---
-# filters.user(OWNER_ID) lagane se sirf owner hi command chala payega
-@app.on_message(filters.command("nightmode") & filters.user(OWNER_ID) & filters.group)
+# --- COMMAND ---
+@app.on_message(filters.command("nightmode") & filters.group)
 async def _nightmode(_, message: Message):
+    if not is_owner(message.from_user.id):
+        return await message.reply_text("❌ **Sɪʀғ Mᴇʀᴇ Mᴀʟɪᴋ (Bᴏᴛ Oᴡɴᴇʀ) ʜɪ ɴɪɢʜᴛᴍᴏᴅᴇ ᴄᴏɴᴛʀᴏʟ ᴋᴀʀ sᴀᴋᴛᴇ ʜᴀɪɴ.**")
+
     await message.reply_photo(
         photo="https://telegra.ph//file/06649d4d0bbf4285238ee.jpg",
-        caption="**ʜᴇʟʟᴏ Sɪʀ! Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴄᴏɴᴛʀᴏʟ ɴɪɢʜᴛᴍᴏᴅᴇ ғᴏʀ ᴛʜɪs ᴄʜᴀᴛ.**",
+        caption="**ʜᴇʟʟᴏ Sɪʀ! Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴄᴏɴᴛʀᴏʟ ɴɪɢʜᴛᴍᴏᴅᴇ.**",
         reply_markup=buttons,
     )
 
-# --- CALLBACK (SIRF OWNER KE LIYE) ---
+# --- CALLBACK ---
 @app.on_callback_query(filters.regex("^(add_night|rm_night)$"))
 async def nightcb(_, query: CallbackQuery):
-    if query.from_user.id not in OWNER_ID:
+    if not is_owner(query.from_user.id):
         return await query.answer("Ye power sirf Bot Owner ke paas hai!", show_alert=True)
 
     chat_id = query.message.chat.id
@@ -85,16 +96,17 @@ async def nightcb(_, query: CallbackQuery):
             await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ.**")
         else:
             await nightmode_on(chat_id)
-            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴇɴᴀʙʟᴇᴅ ʙʏ Oᴡɴᴇʀ! [12AM-6AM]**")
+            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴇɴᴀʙʟᴇᴅ! [12AM-6AM]**")
 
     elif query.data == "rm_night":
         if check_night:
             await nightmode_off(chat_id)
-            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇᴅ ʙʏ Oᴡɴᴇʀ.**")
+            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇᴅ.**")
         else:
             await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ.**")
 
-# --- AUTO FUNCTIONS (NIGHT/MORNING) ---
+# --- AUTO FUNCTIONS ---
+
 async def start_nightmode():
     chats = await get_nightchats()
     for chat in chats:
@@ -125,6 +137,6 @@ async def close_nightmode():
 
 # --- SCHEDULER ---
 scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
-scheduler.add_job(start_nightmode, trigger="cron", hour=0, minute=0) # Raat 12:00 baje
-scheduler.add_job(close_nightmode, trigger="cron", hour=6, minute=0) # Subah 06:00 baje
+scheduler.add_job(start_nightmode, trigger="cron", hour=0, minute=0) # Raat 12 AM
+scheduler.add_job(close_nightmode, trigger="cron", hour=6, minute=0) # Subah 6 AM
 scheduler.start()
