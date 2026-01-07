@@ -16,8 +16,8 @@ load_dotenv()
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-OWNER_ID = int(os.getenv("OWNER_ID", None))
-OWNER_USERNAME = os.getenv("OWNER_USERNAME", "VNI0X")
+OWNER_ID = int(os.getenv("OWNER_ID", "8520496440"))
+OWNER_USERNAME = os.getenv("OWNER_USERNAME", "KIRU_OP")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🛠️ Database & Deployment Configs
