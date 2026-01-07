@@ -1,3 +1,4 @@
+import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import enums, filters
 from pyrogram.types import (
@@ -8,18 +9,16 @@ from pyrogram.types import (
     Message,
 )
 
-# Bot ke main imports
+# Bot ke imports
 from BIGFM import app 
 from BIGFM.core.mongo import mongodb
-from config import OWNER_ID  # Owner ki list config se
+from config import OWNER_ID
 
 # --- DATABASE LOGIC ---
 nightdb = mongodb.nightmode
 
 async def get_nightchats() -> list:
     chats = nightdb.find({"chat_id": {"$lt": 0}})
-    if not chats:
-        return []
     chats_list = []
     async for chat in chats:
         chats_list.append(chat)
@@ -56,76 +55,55 @@ OPEN_CHAT = ChatPermissions(
 
 # --- BUTTONS ---
 buttons = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton("๏ ᴇɴᴀʙʟᴇ ๏", callback_data="add_night"),
-            InlineKeyboardButton("๏ ᴅɪsᴀʙʟᴇ ๏", callback_data="rm_night"),
-        ]
-    ]
+    [[
+        InlineKeyboardButton("๏ ᴇɴᴀʙʟᴇ ๏", callback_data="add_night"),
+        InlineKeyboardButton("๏ ᴅɪsᴀʙʟᴇ ๏", callback_data="rm_night"),
+    ]]
 )
 
-add_buttons = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton(
-                text="๏ ᴀᴅᴅ ᴍᴇ ɪɴ ɢʀᴏᴜᴘ ๏",
-                url=f"https://t.me/{app.username}?startgroup=true",
-            )
-        ]
-    ]
-)
-
-# --- COMMANDS ---
-@app.on_message(filters.command("nightmode") & filters.group)
+# --- COMMAND (SIRF OWNER KE LIYE) ---
+# filters.user(OWNER_ID) lagane se sirf owner hi command chala payega
+@app.on_message(filters.command("nightmode") & filters.user(OWNER_ID) & filters.group)
 async def _nightmode(_, message: Message):
-    # Sirf Bot Owner hi setup kar sakta hai
-    if message.from_user.id not in OWNER_ID:
-        return await message.reply_text("❌ **Sɪʀғ Mᴇʀᴇ Mᴀʟɪᴋ (Bᴏᴛ Oᴡɴᴇʀ) ʜɪ ɴɪɢʜᴛᴍᴏᴅᴇ ᴄᴏɴᴛʀᴏʟ ᴋᴀʀ sᴀᴋᴛᴇ ʜᴀɪɴ.**")
-
-    return await message.reply_photo(
+    await message.reply_photo(
         photo="https://telegra.ph//file/06649d4d0bbf4285238ee.jpg",
-        caption="**ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ ᴏʀ ᴅɪsᴀʙʟᴇ ɴɪɢʜᴛᴍᴏᴅᴇ ɪɴ ᴛʜɪs ᴄʜᴀᴛ.**",
+        caption="**ʜᴇʟʟᴏ Sɪʀ! Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴄᴏɴᴛʀᴏʟ ɴɪɢʜᴛᴍᴏᴅᴇ ғᴏʀ ᴛʜɪs ᴄʜᴀᴛ.**",
         reply_markup=buttons,
     )
 
-# --- CALLBACK ---
+# --- CALLBACK (SIRF OWNER KE LIYE) ---
 @app.on_callback_query(filters.regex("^(add_night|rm_night)$"))
 async def nightcb(_, query: CallbackQuery):
-    data = query.data
-    chat_id = query.message.chat.id
-    user_id = query.from_user.id
-    
-    if user_id not in OWNER_ID:
-        return await query.answer("Ye permission sirf bot owner ke paas hai!", show_alert=True)
+    if query.from_user.id not in OWNER_ID:
+        return await query.answer("Ye power sirf Bot Owner ke paas hai!", show_alert=True)
 
+    chat_id = query.message.chat.id
     check_night = await nightdb.find_one({"chat_id": chat_id})
 
-    if data == "add_night":
+    if query.data == "add_night":
         if check_night:
             await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ.**")
         else:
             await nightmode_on(chat_id)
-            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴇɴᴀʙʟᴇᴅ! Group 12AM band hoga aur 6AM khulega.**")
+            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴇɴᴀʙʟᴇᴅ ʙʏ Oᴡɴᴇʀ! [12AM-6AM]**")
 
-    elif data == "rm_night":
+    elif query.data == "rm_night":
         if check_night:
             await nightmode_off(chat_id)
-            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇᴅ.**")
+            await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇᴅ ʙʏ Oᴡɴᴇʀ.**")
         else:
             await query.message.edit_caption("**๏ ɴɪɢʜᴛᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ.**")
 
-# --- AUTO FUNCTIONS ---
-
+# --- AUTO FUNCTIONS (NIGHT/MORNING) ---
 async def start_nightmode():
     chats = await get_nightchats()
     for chat in chats:
-        chat_id = int(chat["chat_id"])
         try:
+            chat_id = int(chat["chat_id"])
             await app.send_photo(
                 chat_id,
                 photo="https://telegra.ph//file/06649d4d0bbf4285238ee.jpg",
-                caption="**ᴍᴀʏ ᴛʜᴇ ᴀɴɢᴇʟs ғʀᴏᴍ ʜᴇᴀᴠᴇɴ ʙʀɪɴɢ ᴛʜᴇ sᴡᴇᴇᴛᴇsᴛ ᴏғ ᴀʟʟ ᴅʀᴇᴀᴍs ғᴏʀ ʏᴏᴜ. ᴍᴀʏ ʏᴏᴜ ʜᴀᴠᴇ ʟᴏɴɢ ᴀɴᴅ ʙʟɪssғᴜʟ sʟᴇᴇᴘ ғᴜʟʟ ᴏғ ʜᴀᴘᴘʏ ᴅʀᴇᴀᴍs.\n\nɢʀᴏᴜᴘ ɪs ᴄʟᴏsɪɴɢ ɢᴏᴏᴅ ɴɪɢʜᴛ ᴇᴠᴇʀʏᴏɴᴇ !**",
-                reply_markup=add_buttons,
+                caption="**ᴍᴀʏ ᴛʜᴇ ᴀɴɢᴇʟs ғʀᴏᴍ ʜᴇᴀᴠᴇɴ ʙʀɪɴɢ ᴛʜᴇ sᴡᴇᴇᴛᴇsᴛ ᴏғ ᴀʟʟ ᴅʀᴇᴀᴍs ғᴏʀ ʏᴏᴜ. ᴍᴀʏ ʏᴏᴜ ʜᴀᴠᴇ ʟᴏɴɢ ᴀɴᴅ ʙʟɪssғᴜʟ sʟᴇᴇᴘ ғᴜʟʟ ᴏғ ʜᴀᴘᴘʏ ᴅʀᴇᴀᴍs.\n\nɢʀᴏᴜᴘ ɪs ᴄʟᴏsɪɴɢ ɢᴏᴏᴅ ɴɪɢʜᴛ ᴇᴠᴇʀʏᴏɴᴇ !**"
             )
             await app.set_chat_permissions(chat_id, CLOSE_CHAT)
         except:
@@ -134,13 +112,12 @@ async def start_nightmode():
 async def close_nightmode():
     chats = await get_nightchats()
     for chat in chats:
-        chat_id = int(chat["chat_id"])
         try:
+            chat_id = int(chat["chat_id"])
             await app.send_photo(
                 chat_id,
                 photo="https://telegra.ph//file/14ec9c3ff42b59867040a.jpg",
-                caption="**ɢʀᴏᴜᴘ ɪs ᴏᴘᴇɴɪɴɢ ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ ᴇᴠᴇʀʏᴏɴᴇ !\n\nᴍᴀʏ ᴛʜɪs ᴅᴀʏ ᴄᴏᴍᴇ ᴡɪᴛʜ ᴀʟʟ ᴛʜᴇ ʟᴏᴠᴇ ʏᴏᴜʀ ʜᴇᴀʀᴛ ᴄᴀɴ ʜᴏʟᴅ ᴀɴᴅ ʙʀɪɴɢ ʏᴏᴜ ᴇᴠᴇʀʏ sᴜᴄᴄᴇss ʏᴏᴜ ᴅᴇsɪʀᴇ. Mᴀʏ ᴇᴀᴄʜ ᴏғ ʏᴏᴜʀ ғᴏᴏᴛsᴛᴇᴘs ʙʀɪɴɢ Jᴏʏ ᴛᴏ ᴛʜᴇ ᴇᴀʀᴛʜ ᴀɴᴅ ʏᴏᴜʀsᴇʟғ. ɪ ᴡɪsʜ ʏᴏᴜ ᴀ ᴍᴀɢɪᴄᴀʟ ᴅᴀʏ ᴀɴᴅ ᴀ ᴡᴏɴᴅᴇʀғᴜʟ ʟɪғᴇ ᴀʜᴇᴀᴅ.**",
-                reply_markup=add_buttons,
+                caption="**ɢʀᴏᴜᴘ ɪs ᴏᴘᴇɴɪɴɢ ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ ᴇᴠᴇʀʏᴏɴᴇ !\n\nᴍᴀʏ ᴛʜɪs ᴅᴀʏ ᴄᴏᴍᴇ ᴡɪᴛʜ ᴀʟʟ ᴛʜᴇ ʟᴏᴠᴇ ʏᴏᴜʀ ʜᴇᴀʀᴛ ᴄᴀɴ ʜᴏʟᴅ ᴀɴᴅ ʙʀɪɴɢ ʏᴏᴜ ᴇᴠᴇʀʏ sᴜᴄᴄᴇss ʏᴏᴜ ᴅᴇsɪʀᴇ. Mᴀʏ ᴇᴀᴄʜ ᴏғ ʏᴏᴜʀ ғᴏᴏᴛsᴛᴇᴘs ʙʀɪɴɢ Jᴏʏ ᴛᴏ ᴛʜᴇ ᴇᴀʀᴛʜ ᴀɴᴅ ʏᴏᴜʀsᴇʟғ. ɪ ᴡɪsʜ ʏᴏᴜ ᴀ ᴍᴀɢɪᴄᴀʟ ᴅᴀʏ ᴀɴᴅ ᴀ ᴡᴏɴᴅᴇʀғᴜʟ ʟɪғᴇ ᴀʜᴇᴀᴅ.**"
             )
             await app.set_chat_permissions(chat_id, OPEN_CHAT)
         except:
@@ -148,14 +125,6 @@ async def close_nightmode():
 
 # --- SCHEDULER ---
 scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
-
-# Raat ko 12 AM (00:00) band karne ke liye
-scheduler.add_job(start_nightmode, trigger="cron", hour=0, minute=0)
-
-# Subah 6 AM (06:00) kholne ke liye
-scheduler.add_job(close_nightmode, trigger="cron", hour=6, minute=0)
-
+scheduler.add_job(start_nightmode, trigger="cron", hour=0, minute=0) # Raat 12:00 baje
+scheduler.add_job(close_nightmode, trigger="cron", hour=6, minute=0) # Subah 06:00 baje
 scheduler.start()
-
-__MODULE__ = "Nɪɢʜᴛᴍᴏᴅᴇ"
-__HELP__ = "/nightmode - [Owner Only] Control automatic group closing with full messages."
