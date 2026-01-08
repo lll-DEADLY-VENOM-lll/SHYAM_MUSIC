@@ -46,8 +46,8 @@ OPEN_CHAT = ChatPermissions(can_send_messages=True)
 # --- BUTTONS ---
 buttons = InlineKeyboardMarkup(
     [[
-        InlineKeyboardButton("๏ ᴇɴᴀʙʟᴇ ɢʟᴏʙᴀʟ ๏", callback_data="global_on"),
-        InlineKeyboardButton("๏ ᴅɪsᴀʙʟᴇ ɢʟᴏʙᴀʟ ๏", callback_data="global_off"),
+        InlineKeyboardButton("๏ ᴇɴᴀʙʟᴇ ๏", callback_data="global_on"),
+        InlineKeyboardButton("๏ ᴅɪsᴀʙʟᴇ ๏", callback_data="global_off"),
     ]]
 )
 
