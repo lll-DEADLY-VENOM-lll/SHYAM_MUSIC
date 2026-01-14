@@ -3,9 +3,12 @@ import re
 import aiofiles
 import aiohttp
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
-from py_yt import VideosSearch
+# Yahan badlav kiya gaya hai:
+from youtubesearchpython.__future__ import VideosSearch 
+
 from config import YOUTUBE_IMG_URL
 
+# ... baaki ka code waisa hi rahega ...
 # Image resize karne ke liye helper function
 def resize_image(image, width, height):
     return image.resize((width, height), Image.LANCZOS)
