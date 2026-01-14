@@ -8,14 +8,13 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from googleapiclient.discovery import build # Official Google API
 
-from BIGFM.utils.formatters import time_to_seconds
-
 # --- CONFIGURATION ---
-# Get your API KEY from https://console.cloud.google.com/
+# WARNING: Apni API Key kisi ko na batayein. 
 API_KEY = "AIzaSyAfG6kmGSSS0p2NM5nrMoGlhxit1whQvPk" 
 
-# Global instance of YouTube API
-youtube = build("youtube", "v3", developerKey=API_KEY)
+# Global instance of YouTube API 
+# static_discovery=False lagane se auth error nahi aayega
+youtube = build("youtube", "v3", developerKey=API_KEY, static_discovery=False)
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -43,7 +42,7 @@ class YouTubeAPI:
         self.listbase = "https://youtube.com/playlist?list="
 
     def parse_duration(self, duration):
-        """Converts ISO 8601 duration (PT4M13S) to MM:SS and total seconds"""
+        """ISO 8601 duration (PT4M13S) ko MM:SS mein convert karta hai"""
         match = re.search(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration)
         hours = int(match.group(1) or 0)
         minutes = int(match.group(2) or 0)
@@ -85,11 +84,9 @@ class YouTubeAPI:
         if videoid:
             vidid = link
         else:
-            # Extract Video ID from URL
             match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", link)
             vidid = match.group(1) if match else None
 
-        # If it's a search query instead of a link
         if not vidid:
             search_response = await asyncio.to_thread(
                 youtube.search().list(q=link, part="id", maxResults=1, type="video").execute
@@ -98,7 +95,6 @@ class YouTubeAPI:
                 return None
             vidid = search_response["items"][0]["id"]["videoId"]
 
-        # Fetch video details
         video_response = await asyncio.to_thread(
             youtube.videos().list(part="snippet,contentDetails", id=vidid).execute
         )
@@ -143,10 +139,19 @@ class YouTubeAPI:
         return track_details, vidid
 
     async def video(self, link: str, videoid: Union[bool, str] = None):
+        """vplay ke liye optimized function"""
         if videoid:
             link = self.base + link
         
-        opts = ["yt-dlp", "-g", "-f", "best[height<=?720][width<=?1280]", f"{link}"]
+        # Format ko MP4 aur 480p/720p pe set kiya hai taaki smooth chale
+        opts = [
+            "yt-dlp", 
+            "-g", 
+            "-f", "best[height<=?720][ext=mp4]/best", 
+            "--geo-bypass",
+            "--no-playlist",
+            f"{link}"
+        ]
         if cookies_file:
             opts.insert(1, "--cookies")
             opts.insert(2, cookies_file)
@@ -189,7 +194,6 @@ class YouTubeAPI:
         title = result["snippet"]["title"]
         thumbnail = result["snippet"]["thumbnails"]["high"]["url"]
         
-        # Need secondary call for duration
         video_res = await asyncio.to_thread(
             youtube.videos().list(part="contentDetails", id=vidid).execute
         )
@@ -224,7 +228,7 @@ class YouTubeAPI:
                 return path
 
         def video_dl():
-            ydl_opts = {**common_opts, "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])", "outtmpl": "downloads/%(id)s.%(ext)s"}
+            ydl_opts = {**common_opts, "format": "best[height<=?720][ext=mp4]", "outtmpl": "downloads/%(id)s.%(ext)s"}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link, False)
                 path = os.path.join("downloads", f"{info['id']}.{info['ext']}")
