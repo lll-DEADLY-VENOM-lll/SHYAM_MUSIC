@@ -21,7 +21,7 @@ MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 # यहाँ अपनी सभी Keys को कोमा (,) लगाकर डालें। 
 # उदाहरण: "key1, key2, key3"
 # -----------------------------------------------------------------
-API_KEY = getenv("API_KEY", "AIzaSyDYXTbXOP6X9vYm4BSrCiLoMl24lvt7XGs, AIzaSyAwBmV6pjZcd8gM8paeA5mi00eejGUXeBc,)
+API_KEY = getenv("API_KEY", "AIzaSyDYXTbXOP6X9vYm4BSrCiLoMl24lvt7XGs, AIzaSyAwBmV6pjZcd8gM8paeA5mi00eejGUXeBc",)
 # -----------------------------------------------------------------
 
 ## Other vars
