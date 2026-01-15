@@ -37,7 +37,7 @@ API_KEY = getenv("API_KEY", "AIzaSyDYXTbXOP6X9vYm4BSrCiLoMl24lvt7XGs, AIzaSyAwBm
 # -----------------------------------------------------------------
 # LOGGER & OWNER CONFIG (Fixes Log Group Error)
 # -----------------------------------------------------------------
-LOGGER_ID = int(getenv("LOGGER_ID", "-1001511253627"))
+LOGGER_ID = int(getenv("LOGGER_ID", "-1003034048678"))
 LOG_GROUP_ID = LOGGER_ID 
 OWNER_ID = int(getenv("OWNER_ID", "7967418569"))
 
