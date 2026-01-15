@@ -15,6 +15,11 @@ BOT_TOKEN = getenv("BOT_TOKEN", None)
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
 # -----------------------------------------------------------------
+# PRIVACY & POLICY (Fixes AttributeError: PRIVACY_LINK)
+# -----------------------------------------------------------------
+PRIVACY_LINK = getenv("PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-AvishaMusic-08-14")
+
+# -----------------------------------------------------------------
 # HEROKU CONFIG (Fixes AttributeError: HEROKU_API_KEY)
 # -----------------------------------------------------------------
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME", None)
@@ -30,14 +35,14 @@ GIT_TOKEN = getenv("GIT_TOKEN", None)
 API_KEY = getenv("API_KEY", "AIzaSyDYXTbXOP6X9vYm4BSrCiLoMl24lvt7XGs, AIzaSyAwBmV6pjZcd8gM8paeA5mi00eejGUXeBc")
 
 # -----------------------------------------------------------------
-# LOGGER & OWNER CONFIG
+# LOGGER & OWNER CONFIG (Fixes Log Group Error)
 # -----------------------------------------------------------------
 LOGGER_ID = int(getenv("LOGGER_ID", "-1001511253627"))
 LOG_GROUP_ID = LOGGER_ID 
 OWNER_ID = int(getenv("OWNER_ID", "7967418569"))
 
 # -----------------------------------------------------------------
-# SUPPORT & LINKS
+# SUPPORT & LINKS (Fixes ImportError: SUPPORT_GROUP)
 # -----------------------------------------------------------------
 SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_deadly_venom")
 SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/NOBITA_SUPPORT")
@@ -113,7 +118,7 @@ def time_to_seconds(time):
 DURATION_LIMIT = int(time_to_seconds(f"{DURATION_LIMIT_MIN}:00"))
 
 # -----------------------------------------------------------------
-# URL VALIDATION
+# VALIDATION
 # -----------------------------------------------------------------
 if SUPPORT_CHANNEL:
     if not re.match("(?:http|https)://", SUPPORT_CHANNEL):
