@@ -7,10 +7,19 @@ from pyrogram.enums import MessageEntityType
 from googleapiclient.discovery import build
 
 # अपनी API Key यहाँ डालें
-YOUTUBE_API_KEY = "AIzaSyCHRfOCjo77bI3HYRvwIjxIke2TuFT_vh8"
+YOUTUBE_API_KEY = "YOUR_GOOGLE_API_KEY_HERE"
 
-# YouTube API Client Setup
 youtube_client = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
+
+# कुकीज़ फाइल चुनने के लिए फंक्शन
+def get_random_cookie():
+    folder_path = f"{os.getcwd()}/cookies"
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        return None
+    return random.choice(txt_files)
 
 def parse_duration(duration_iso):
     try:
@@ -23,22 +32,12 @@ def parse_duration(duration_iso):
     except:
         return "00:00", 0
 
-async def shell_cmd(cmd):
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    out, errorz = await proc.communicate()
-    return out.decode("utf-8") if out else errorz.decode("utf-8")
-
 class YouTubeAPI:
     def __init__(self):
         self.base = "https://www.youtube.com/watch?v="
         self.regex = r"(?:youtube\.com|youtu\.be)"
         self.listbase = "https://youtube.com/playlist?list="
 
-    # --- ज़रूरी हेल्पर फंक्शन्स ---
     async def exists(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -75,7 +74,6 @@ class YouTubeAPI:
         match = re.search(regex, link)
         return match.group(1) if match else None
 
-    # --- Google API Details ---
     async def details(self, link: str, videoid: Union[bool, str] = None):
         loop = asyncio.get_event_loop()
         v_id = link if videoid else await self.get_video_id(link)
@@ -117,21 +115,6 @@ class YouTubeAPI:
         }
         return track_details, v_id
 
-    async def playlist(self, link, limit, user_id, videoid: Union[bool, str] = None):
-        if videoid:
-            link = self.listbase + link
-        if "&" in link:
-            link = link.split("&")[0]
-        playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --playlist-end {limit} --skip-download {link}"
-        )
-        try:
-            result = playlist.split("\n")
-            result = [x for x in result if x]
-        except:
-            result = []
-        return result
-
     async def download(
         self,
         link: str,
@@ -148,13 +131,13 @@ class YouTubeAPI:
         loop = asyncio.get_running_loop()
 
         def download_logic():
+            cookie_file = get_random_cookie()
             ydl_opts = {
                 "quiet": True,
                 "no_warnings": True,
                 "geo_bypass": True,
                 "nocheckcertificate": True,
-                "username": "oauth2",
-                "password": "",
+                "cookiefile": cookie_file, # यहाँ कुकी फ़ाइल का इस्तेमाल होगा
             }
 
             if songvideo:
