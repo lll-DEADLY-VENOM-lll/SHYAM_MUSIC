@@ -9,7 +9,7 @@ from pyrogram.types import Message
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# Config se API Keys ki list mangwa rahe hain
+# Config se API Keys ki list
 try:
     from config import YOUTUBE_API_KEYS
 except ImportError:
@@ -79,48 +79,53 @@ class YouTubeAPI:
             match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", link)
             vidid = match.group(1) if match else None
 
-        # Try with Google API first
+        # --- GOOGLE API TRY ---
         if YouTubeAPI.youtube_client:
             for _ in range(len(YOUTUBE_API_KEYS)):
                 try:
                     if not vidid:
-                        search_response = await asyncio.to_thread(
+                        search_res = await asyncio.to_thread(
                             YouTubeAPI.youtube_client.search().list(q=link, part="id", maxResults=1, type="video").execute
                         )
-                        if not search_response.get("items"): break
-                        vidid = search_response["items"][0]["id"]["videoId"]
+                        if not search_res.get("items"): break
+                        vidid = search_res["items"][0]["id"]["videoId"]
 
-                    video_response = await asyncio.to_thread(
+                    video_res = await asyncio.to_thread(
                         YouTubeAPI.youtube_client.videos().list(part="snippet,contentDetails", id=vidid).execute
                     )
                     
-                    if not video_response.get("items"): break
-
-                    video_data = video_response["items"][0]
-                    title = video_data["snippet"]["title"]
-                    thumbnail = video_data["snippet"]["thumbnails"]["high"]["url"]
-                    duration_iso = video_data["contentDetails"]["duration"]
-                    duration_min, duration_sec = self.parse_duration(duration_iso)
+                    if not video_res.get("items"): break
+                    v_data = video_res["items"][0]
+                    title = v_data["snippet"]["title"]
+                    thumbnail = v_data["snippet"]["thumbnails"]["high"]["url"]
+                    duration_min, _ = self.parse_duration(v_data["contentDetails"]["duration"])
                     
-                    return title, duration_min, duration_sec, thumbnail, vidid
-
+                    return title, duration_min, 0, thumbnail, vidid
                 except HttpError as e:
                     if e.resp.status in [403, 429]:
                         self._rotate_key()
                         continue
                     break
-                except Exception:
-                    break
+                except Exception: break
 
-        # --- FALLBACK: yt-dlp logic for search and details ---
+        # --- YT-DLP FALLBACK (Optimized for SABR/No-JS) ---
         try:
             loop = asyncio.get_running_loop()
-            # Agar vidid nahi hai toh search karein (ytsearch:)
             search_query = f"ytsearch1:{link}" if not vidid else f"https://www.youtube.com/watch?v={vidid}"
             
-            with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "format": "bestaudio"}) as ydl:
+            # YDL Options to minimize JS runtime errors
+            ydl_opts = {
+                "quiet": True,
+                "no_warnings": True,
+                "format": "bestaudio/best",
+                "skip_download": True,
+                "nocheckcertificate": True,
+                "geo_bypass": True,
+                "extract_flat": "in_playlist", # SABR errors se bachne ke liye
+            }
+            
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = await loop.run_in_executor(None, lambda: ydl.extract_info(search_query, download=False))
-                
                 if 'entries' in info and len(info['entries']) > 0:
                     data = info['entries'][0]
                 else:
@@ -133,8 +138,7 @@ class YouTubeAPI:
                     data.get('thumbnail', ''),
                     data.get('id', '')
                 )
-        except Exception as e:
-            print(f"Final Fallback Error: {e}")
+        except Exception:
             return None
 
     async def title(self, link: str, videoid: Union[bool, str] = None):
@@ -153,13 +157,7 @@ class YouTubeAPI:
         res = await self.details(link, videoid)
         if not res: return None, None
         title, duration_min, duration_sec, thumbnail, vidid = res
-        track_details = {
-            "title": title,
-            "link": self.base + vidid,
-            "vidid": vidid,
-            "duration_min": duration_min,
-            "thumb": thumbnail,
-        }
+        track_details = {"title": title, "link": self.base + vidid, "vidid": vidid, "duration_min": duration_min, "thumb": thumbnail}
         return track_details, vidid
 
     async def exists(self, link: str, videoid: Union[bool, str] = None):
@@ -177,7 +175,7 @@ class YouTubeAPI:
         if videoid: link = self.base + link
         loop = asyncio.get_running_loop()
         def dl():
-            opts = {"format": "bestaudio/best" if not video else "best[height<=?720][ext=mp4]", "outtmpl": "downloads/%(id)s.%(ext)s", "quiet": True}
+            opts = {"format": "bestaudio/best" if not video else "best[height<=?720][ext=mp4]", "outtmpl": "downloads/%(id)s.%(ext)s", "quiet": True, "no_warnings": True}
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(link, download=True)
                 return os.path.join("downloads", f"{info['id']}.{info['ext']}")
