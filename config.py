@@ -33,9 +33,9 @@ GIT_TOKEN = getenv("GIT_TOKEN", None)
 # YOUTUBE API KEYS (Multiple Keys Rotation Option)
 # -----------------------------------------------------------------
 # Aap 3 alag alag keys yahan set kar sakte hain
-API_KEY_1 = getenv("API_KEY", "AIzaSyACgEYXqRtQZ8AG77T5xZgGtEP1bt8Mekk")
-API_KEY_2 = getenv("API_KEY_2", None)
-API_KEY_3 = getenv("API_KEY_3", None)
+API_KEY_1 = getenv("API_KEY", "AIzaSyCFv5iwf9_CZKYcifMFK43zMZ78NH5GwE8")
+API_KEY_2 = getenv("API_KEY_2", "AIzaSyBlbkp4_XbjOZAMG6mr_QMmurBW9tcpu0s")
+API_KEY_3 = getenv("API_KEY_3", "AIzaSyCHRfOCjo77bI3HYRvwIjxIke2TuFT_vh8")
 
 # In sabhi keys ko ek list mein store karte hain taaki rotation kaam kare
 # Sirf wahi keys list mein jayengi jo empty nahi hain
