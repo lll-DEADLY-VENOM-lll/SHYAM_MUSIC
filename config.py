@@ -15,12 +15,12 @@ BOT_TOKEN = getenv("BOT_TOKEN", None)
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
 # -----------------------------------------------------------------
-# PRIVACY & POLICY (Fixes AttributeError: PRIVACY_LINK)
+# PRIVACY & POLICY
 # -----------------------------------------------------------------
 PRIVACY_LINK = getenv("PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-AvishaMusic-08-14")
 
 # -----------------------------------------------------------------
-# HEROKU CONFIG (Fixes AttributeError: HEROKU_API_KEY)
+# HEROKU CONFIG
 # -----------------------------------------------------------------
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME", None)
 HEROKU_API_KEY = getenv("HEROKU_API_KEY", None)
@@ -30,19 +30,29 @@ UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv("GIT_TOKEN", None)
 
 # -----------------------------------------------------------------
-# YOUTUBE API KEYS
+# YOUTUBE API KEYS (Multiple Keys Rotation Option)
 # -----------------------------------------------------------------
-API_KEY = getenv("API_KEY", "AIzaSyACgEYXqRtQZ8AG77T5xZgGtEP1bt8Mekk")
+# Aap 3 alag alag keys yahan set kar sakte hain
+API_KEY_1 = getenv("API_KEY", "AIzaSyACgEYXqRtQZ8AG77T5xZgGtEP1bt8Mekk")
+API_KEY_2 = getenv("API_KEY_2", None)
+API_KEY_3 = getenv("API_KEY_3", None)
+
+# In sabhi keys ko ek list mein store karte hain taaki rotation kaam kare
+# Sirf wahi keys list mein jayengi jo empty nahi hain
+YOUTUBE_API_KEYS = [k.strip() for k in [API_KEY_1, API_KEY_2, API_KEY_3] if k and k.strip()]
+
+# Purane code ke saath compatibility ke liye (Pehli key ko default rakha hai)
+API_KEY = YOUTUBE_API_KEYS[0] if YOUTUBE_API_KEYS else None
 
 # -----------------------------------------------------------------
-# LOGGER & OWNER CONFIG (Fixes Log Group Error)
+# LOGGER & OWNER CONFIG
 # -----------------------------------------------------------------
 LOGGER_ID = int(getenv("LOGGER_ID", "-1003034048678"))
 LOG_GROUP_ID = LOGGER_ID 
 OWNER_ID = int(getenv("OWNER_ID", "7967418569"))
 
 # -----------------------------------------------------------------
-# SUPPORT & LINKS (Fixes ImportError: SUPPORT_GROUP)
+# SUPPORT & LINKS
 # -----------------------------------------------------------------
 SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_deadly_venom")
 SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/NOBITA_SUPPORT")
