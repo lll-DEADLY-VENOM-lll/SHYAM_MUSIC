@@ -13,26 +13,7 @@ from googleapiclient.errors import HttpError
 try:
     from config import YOUTUBE_API_KEYS
 except ImportError:
-    YOUTUBE_API_KEYS = ["AIzaSyACgEYXqRtQZ8AG77T5xZgGtEP1bt8Mekk"]
-
-async def shell_cmd(cmd):
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    out, errorz = await proc.communicate()
-    if errorz:
-        if "unavailable videos are hidden" in (errorz.decode("utf-8")).lower():
-            return out.decode("utf-8")
-        else:
-            return errorz.decode("utf-8")
-    return out.decode("utf-8")
-
-# Cookies handling
-cookies_file = "BIGFM/cookies.txt"
-if not os.path.exists(cookies_file):
-    cookies_file = None
+    YOUTUBE_API_KEYS = []
 
 class YouTubeAPI:
     # --- GLOBAL STATE ---
@@ -44,13 +25,10 @@ class YouTubeAPI:
         self.regex = r"(?:youtube\.com|youtu\.be)"
         self.listbase = "https://youtube.com/playlist?list="
         
-        # Initialize client if not already done
         if YouTubeAPI.youtube_client is None:
             self._build_youtube_client()
 
-    # --- YE FUNCTION MISSING THA (IMPORTANT) ---
     async def url(self, message_1: Message) -> Union[str, None]:
-        """Message se YouTube URL extract karne ke liye"""
         messages = [message_1]
         if message_1.reply_to_message:
             messages.append(message_1.reply_to_message)
@@ -68,7 +46,6 @@ class YouTubeAPI:
         return None
 
     def _build_youtube_client(self):
-        """Current active key se Google API client banata hai"""
         if not YOUTUBE_API_KEYS:
             return None
         try:
@@ -82,11 +59,9 @@ class YouTubeAPI:
             YouTubeAPI.youtube_client = None
 
     def _rotate_key(self):
-        """Quota khatm hone par permanent switch karein"""
         if len(YOUTUBE_API_KEYS) > 1:
             YouTubeAPI.current_key_index = (YouTubeAPI.current_key_index + 1) % len(YOUTUBE_API_KEYS)
             self._build_youtube_client()
-            print(f"INFO: API Switched to Key Index: {YouTubeAPI.current_key_index}")
 
     def parse_duration(self, duration):
         match = re.search(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration)
@@ -104,6 +79,7 @@ class YouTubeAPI:
             match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", link)
             vidid = match.group(1) if match else None
 
+        # Try with Google API first
         if YouTubeAPI.youtube_client:
             for _ in range(len(YOUTUBE_API_KEYS)):
                 try:
@@ -136,14 +112,29 @@ class YouTubeAPI:
                 except Exception:
                     break
 
-        # Fallback to yt-dlp
+        # --- FALLBACK: yt-dlp logic for search and details ---
         try:
             loop = asyncio.get_running_loop()
-            with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
-                info = await loop.run_in_executor(None, lambda: ydl.extract_info(link if not vidid else self.base + vidid, download=False))
-                if 'entries' in info: info = info['entries'][0]
-                return info['title'], info.get('duration_string', "00:00"), info.get('duration', 0), info['thumbnail'], info['id']
-        except Exception:
+            # Agar vidid nahi hai toh search karein (ytsearch:)
+            search_query = f"ytsearch1:{link}" if not vidid else f"https://www.youtube.com/watch?v={vidid}"
+            
+            with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "format": "bestaudio"}) as ydl:
+                info = await loop.run_in_executor(None, lambda: ydl.extract_info(search_query, download=False))
+                
+                if 'entries' in info and len(info['entries']) > 0:
+                    data = info['entries'][0]
+                else:
+                    data = info
+
+                return (
+                    data.get('title', 'Unknown'),
+                    data.get('duration_string', '00:00'),
+                    data.get('duration', 0),
+                    data.get('thumbnail', ''),
+                    data.get('id', '')
+                )
+        except Exception as e:
+            print(f"Final Fallback Error: {e}")
             return None
 
     async def title(self, link: str, videoid: Union[bool, str] = None):
