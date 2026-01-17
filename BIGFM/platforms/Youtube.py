@@ -10,7 +10,7 @@ from googleapiclient.discovery import build # Official Google API
 
 # --- CONFIGURATION ---
 # WARNING: Apni API Key kisi ko na batayein. 
-API_KEY = "AIzaSyAfG6kmGSSS0p2NM5nrMoGlhxit1whQvPk" 
+API_KEY = "AIzaSyDyN6mPVdrm-EX_0ruJmpOrhTZJyZPibpU" 
 
 # Global instance of YouTube API 
 # static_discovery=False lagane se auth error nahi aayega
