@@ -12,7 +12,7 @@ from BIGFM.utils.formatters import time_to_seconds
 
 # --- CONFIGURATION ---
 # Get your API KEY from https://console.cloud.google.com/
-API_KEY = "AIzaSyCFv5iwf9_CZKYcifMFK43zMZ78NH5GwE8" 
+API_KEY = "AIzaSyAfG6kmGSSS0p2NM5nrMoGlhxit1whQvPk" 
 
 # Global instance of YouTube API
 youtube = build("youtube", "v3", developerKey=API_KEY)
