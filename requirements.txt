@@ -27,8 +27,6 @@ pymongo==3.12.0
 tgcrypto
 unidecode
 yt-dlp
-youtube-search
-youtube-search-python
-ytmusicapi
 aria2
 safoneAPI
+oauth2client
